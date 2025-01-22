@@ -133,3 +133,35 @@ tr:nth-child(even) {
 .ml-10p {
     margin-left: 10px;
 }
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    #formList li {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    button {
+        width: 100%;
+        max-width: 200px;
+        margin: 5px 0;
+    }
+
+    .modal-content {
+        width: 95%;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    td,
+    th {
+        white-space: nowrap;
+    }
+}
