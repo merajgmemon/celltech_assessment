@@ -103,3 +103,33 @@ textarea {
 .form-div>label {
     padding: 5px;
 }
+
+.form-div>div>label>input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.formViewModalActions {
+    float: right;
+    margin-top: 15px;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td,
+th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.ml-10p {
+    margin-left: 10px;
+}

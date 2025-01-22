@@ -166,3 +166,171 @@ document.getElementById("closeModal")!.onclick = () => {
     const modal = document.getElementById("formViewModal")!;
     modal.style.display = "none";
 };
+
+// Function to view and fill a form
+function viewFillForm(index: number) {
+    const form = forms[index];
+    const formFieldsContainer = document.getElementById("formFieldsContainer")!;
+    formFieldsContainer.innerHTML = "";
+
+    form.fields.forEach((field, fieldIndex) => {
+        let fieldInput: any;
+
+        if (field.type === "single-text" || field.type === "multi-text") {
+            fieldInput = document.createElement(field.type === "multi-text" ? "textarea" : "input");
+            (fieldInput as HTMLInputElement).type = "text";
+            fieldInput.name = field.label;
+        } else if (field.type === "checkbox" || field.type === "radio") {
+            fieldInput = document.createElement("div");
+            field.options?.forEach(option => {
+                const inputOption = document.createElement("input");
+                inputOption.type = field.type;
+                inputOption.name = field.label;
+                inputOption.value = option;
+                inputOption.setAttribute("data-index", fieldIndex.toString());  // Fix: Set data-index here
+
+                const label = document.createElement("label");
+                label.textContent = option;
+                label.appendChild(inputOption);
+
+                fieldInput.appendChild(label);
+            });
+        } else if (field.type === "dropdown") {
+            fieldInput = document.createElement("select");
+            fieldInput.name = field.label;
+            field.options?.forEach(option => {
+                const optionElement = document.createElement("option");
+                optionElement.value = option;
+                optionElement.textContent = option;
+                fieldInput.appendChild(optionElement);
+            });
+        }
+
+        if (fieldInput) {
+            fieldInput.setAttribute("data-index", fieldIndex.toString());  // Fix: Ensure this is set
+            formFieldsContainer.appendChild(fieldInput);
+        }
+
+        const labelElement = document.createElement("label");
+        labelElement.textContent = field.label;
+        labelElement.className = "";
+
+        const fieldDiv = document.createElement("div");
+        fieldDiv.className = "form-div";
+        fieldDiv.appendChild(labelElement);
+        fieldDiv.appendChild(fieldInput!);
+
+        formFieldsContainer.appendChild(fieldDiv);
+    });
+
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.onclick = () => saveFormData(index);
+    formFieldsContainer.appendChild(saveButton);
+
+    const modal = document.getElementById("formViewModal")!;
+    modal.style.display = "flex";
+    document.getElementById("modalTitle")!.innerText = "View/Fill Form";
+}
+
+// Function to save form data
+function saveFormData(index: number) {
+    const form = forms[index];
+    const response: Record<string, string | string[]> = {};
+
+    // Select all form inputs inside the form view modal
+    const inputs = document.querySelectorAll("#formFieldsContainer input, #formFieldsContainer select, #formFieldsContainer textarea");
+
+    inputs.forEach(input => {
+        const fieldIndex = parseInt(input.getAttribute("data-index")!);
+        const fieldLabel = form.fields[fieldIndex].label;
+
+        if (input instanceof HTMLInputElement) {
+            if (input.type === "checkbox") {
+                // Handle checkboxes as an array of selected values
+                if (input.checked) {
+                    if (!response[fieldLabel]) {
+                        response[fieldLabel] = [];
+                    }
+                    (response[fieldLabel] as string[]).push(input.value);
+                }
+            } else if (input.type === "radio") {
+                // Handle radio button
+                if (input.checked) {
+                    response[fieldLabel] = input.value;
+                }
+            } else {
+                // Handle single-text and multi-text
+                response[fieldLabel] = input.value;
+            }
+        } else if (input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement) {
+            response[fieldLabel] = input.value;
+        }
+    });
+
+    // Ensure empty checkboxes store an empty array
+    form.fields.forEach(field => {
+        if (field.type === "checkbox" && !response[field.label]) {
+            response[field.label] = [];
+        }
+    });
+
+    form.responses!.push(response);
+    localStorage.setItem("forms", JSON.stringify(forms));
+    alert("Form data saved successfully!");
+    document.getElementById("formViewModal")!.style.display = "none";
+    displayForms();
+}
+
+// Function to view submitted form data
+function viewFormData(index: number) {
+    const form = forms[index];
+    const modalContent = document.getElementById("formFieldsContainer")!;
+    modalContent.innerHTML = "";
+
+    if (!form.responses || form.responses.length === 0) {
+        modalContent.innerHTML = "<p>No data available.</p>";
+    } else {
+        const table = document.createElement("table");
+        const headerRow = document.createElement("tr");
+
+        // Create table headers dynamically based on field labels
+        form.fields.forEach(field => {
+            const th = document.createElement("th");
+            th.textContent = field.label;
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        // Populate the table rows with form response data
+        form.responses.forEach(response => {
+            const row = document.createElement("tr");
+            form.fields.forEach(field => {
+                const td = document.createElement("td");
+                const fieldValue = response[field.label];
+
+                // Convert array values (checkboxes) to a comma-separated string
+                if (Array.isArray(fieldValue)) {
+                    td.textContent = fieldValue.join(", ");
+                } else {
+                    td.textContent = fieldValue || "N/A";
+                }
+
+                row.appendChild(td);
+            });
+            table.appendChild(row);
+        });
+
+        modalContent.appendChild(table);
+    }
+
+    const modal = document.getElementById("formViewModal")!;
+    modal.style.display = "flex";
+    document.getElementById("modalTitle")!.innerText = "View Form Data";
+}
+
+// Event listener for creating a new form
+document.getElementById("createFormButton")!.addEventListener("click", createForm);
+
+// Initial render of forms list
+displayForms();
