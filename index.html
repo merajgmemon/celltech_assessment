@@ -9,11 +9,33 @@
 </head>
 
 <body>
-    <div id="app">
+    <div class="container">
         <h1>Form Builder</h1>
-        
+
+        <!-- Form Creation Section -->
+        <div class="form-creation">
+            <input type="text" id="formName" placeholder="Enter Form Name" />
+            <button id="createFormButton">Create Form</button>
+        </div>
+
+        <!-- List of Forms -->
+        <h2>Forms List</h2>
+        <ul id="formList"></ul>
+
+        <!-- Form View Modal -->
+        <div id="formViewModal" class="modal">
+            <div class="modal-content">
+                <h2 id="modalTitle">View Form</h2>
+                <div id="formFieldsContainer"></div>
+                <div class="formViewModalActions">
+                    <!-- <button id="submitForm">Submit</button> -->
+                    <button id="closeModal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <script type="module" src="script.ts"></script>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
